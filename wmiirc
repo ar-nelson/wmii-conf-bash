@@ -1,0 +1,164 @@
+#!/bin/sh
+#
+# This is the core configuration file for wmii.
+#
+# Unless you are doing something particularly advanced, this probably isn't the
+# file you want to edit. This wmii configuration is modular, and split into
+# several files. Read README.md for more information.
+
+export wmii_confroot="$HOME/.wmii-hg"
+wmii_newline='
+'
+
+# First, load the predefined functions in util/common.sh.
+. $wmii_confroot/util/common.sh
+
+# Set some default options.
+#
+# If you're trying to change these settings, DO NOT EDIT THIS CODE. Edit
+# options.sh or a style file instead; the values in those files will overwrite
+# these default options.
+modkey=Mod4
+up=Up
+down=Down
+left=Left
+right=Right
+wmii_term=x-terminal-emulator
+wmii_menucmd=wmii9menu
+wmii_normcolors='#000000 #c1c48b #81654f'
+wmii_focuscolors='#000000 #81654f #000000'
+wmii_urgentcolors='#ff0000 #ffffff #000000'
+wmii_modecolors='#ff0000 #ffffff #000000'
+wmii_border=1
+wmii_font='-*-fixed-medium-r-*-*-13-*-*-*-*-*-*-*'
+wmii_startview=1
+wmii_barpos=bottom
+wmii_max_menu_len=5000
+
+wmii_xmessage=xmessage
+which gxmessage > /dev/null && wmii_xmessage=gxmessage
+
+# Load the options defined in conf/options.sh.
+# (This is where variables like $modkey, etc., should be defined.)
+. $wmii_confroot/conf/options.sh
+
+# Load the current style.
+if [ -e "$wmii_confroot/styles/$wmii_style.sh" ]; then
+    . $wmii_confroot/styles/$wmii_style.sh
+fi
+wmiir write /ctl <<!
+    focuscolors $wmii_focuscolors
+    normcolors $wmii_normcolors
+    grabmod $modkey
+    border $wmii_border
+    font $wmii_font
+    view $wmii_startview
+    bar on $wmii_barpos
+!
+
+cache_programs
+
+# Create the initial view.
+echo colors "$wmii_focuscolors$wmii_newline" label "$wmii_startview" | wmiir create "/lbar/$wmii_startview"
+
+# Load the rules and column rules configuration files.
+cat $wmii_confroot/conf/rules.conf | wmiir write /rules
+cat $wmii_confroot/conf/colrules.conf | wmiir write /colrules
+
+# Create the notice bar.
+echo colors "$wmii_normcolors" | wmiir create /rbar/!notice
+
+# Switch to the Default mode, assigning keybindings in the process.
+mode default
+
+. $wmii_confroot/conf/widgets.sh
+
+# Run autostart applications.
+$wmii_confroot/conf/startup.sh &
+
+# Broadcast a "Start" event, to notify other wmii instances.
+wmiir xwrite /event Start wmiirc
+
+echo "Starting event loop..."
+# Open /event for reading.
+wmiir read /event |
+# Read the events, line by line.
+while read line; do
+    set -- $line
+    event=$1; shift
+    line="$(echo $line | sed 's/^[^ ]* //' | tr -d '\n')"
+
+    # Process the event
+    case $event in
+    Start)                          # Quit when a new instance starts
+        echo "Another wmii instance has started; goodbye!"
+        [ $1 = wmiirc ] && exit;;
+    Action)
+        action "$@" &;;
+
+    CreateTag)                      # CreateTag <Tag Name>
+        echo colors "$wmii_normcolors$wmii_newline" label "$@" | wmiir create "/lbar/$@";;
+    DestroyTag)                     # DestroyTag <Tag Name>
+        wmiir rm "/lbar/$@";;
+    FocusTag)                       # FocusTag <Tag Name>
+        wmiir xwrite "/lbar/$@" colors "$wmii_focuscolors";;
+    UnfocusTag)                     # UnfocusTag <Tag Name>
+        wmiir xwrite "/lbar/$@" colors "$wmii_normcolors";;
+
+    Notice)
+        echo colors "$wmii_focuscolors$wmii_newline" label "$line" | wmiir write /rbar/!notice
+        #kill $xpid 2>/dev/null
+        {
+            sleep 5;
+            echo colors "$wmii_normcolors$wmii_newline" label ' ' | wmiir write /rbar/!notice;
+        } &;;
+        #xpid = $!;;
+    Unresponsive)
+    {
+        win=$1
+        win_name=$(wmiir read /client/$win/label)
+        msg="The window \"$win_name\" is not responding.${wmii_newline}What do you want to do?"
+        resp=$(wihack -transient $win $wmii_xmessage -nearmouse -buttons "Force Close,Wait" -print "$msg")
+        [ "$resp" = "Force Close" ] && wmiir xwrite /client/$win/ctl slay &
+    } &;;
+
+    UrgentTag)                      # UrgentTag <'Client' or 'Manager'> <Tag Name>
+        shift
+        wmiir xwrite "/lbar/$@" label "*$@";;
+    NotUrgentTag)                   # NotUrgentTag <'Client' or 'Manager'> <TagName>
+        shift
+        wmiir xwrite "/lbar/$@" label "$@";;
+
+    # Key Events
+    Key)                            # Key <Key Name>
+        #echo "Got key: $1"
+        handle_key $1;;
+
+    # Client menu
+    ClientClick)                    # ClientClick <Client ID> <Button>
+        case $2 in
+        3)
+            window_menu $1 &;;
+        esac;;
+    ClientMouseDown)                # ClientMouseDown <Client ID> <Button>
+        case $2 in
+        4)
+            wmiir xwrite /tag/sel/ctl select up;;
+        5)
+            wmiir xwrite /tag/sel/ctl select down;;
+        esac;;
+
+    # Tag events
+    LeftBarMouseDown)               # LeftBarMouseDown <Button> <Bar Name>
+        if [ $2 = "!mode" ]; then
+            mode default
+        else
+            wmiir xwrite /ctl view $2
+        fi;;
+
+    # Widget events
+    RightBarMouseDown)              # RightBarMouseDown <Button> <Bar Name>
+        # TODO: Do something here.
+    esac
+done
+

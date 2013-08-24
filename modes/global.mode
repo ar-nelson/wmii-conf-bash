@@ -1,0 +1,12 @@
+
+# Volume control with multimedia keys
+
+XF86AudioLowerVolume
+    amixer -q set Master 2- unmute
+
+XF86AudioRaiseVolume
+    amixer -q set Master 2+ unmute
+
+XF86AudioMute
+    amixer -q set Master toggle
+

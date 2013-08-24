@@ -1,0 +1,41 @@
+# This is a wmii widget file.
+#
+# It is defined using the menu file format (shell script code in indented
+# blocks under unindented headers).
+#
+# This is the clock widget, the reference implementation of a wmii widget. 
+#
+# Usage: clock.widget [format] [clickcmd] [colors]
+
+
+# The 'Start' block is executed when the widget is created.
+Start
+    w_format="%r"
+    w_clickcmd="notify-send \"\`date \"+%A, %B %e, %Y\"\`\""
+    w_colors="$wmii_normcolors"
+
+    if [ -n "$1" ]; then
+        w_format="$1"
+        if [ -n "$2" ]; then
+            w_clickcmd="$2"
+            if [-n "$3" ]; then
+                w_colors="$3"
+            fi
+        fi
+    fi
+
+    widget_color "$w_colors"
+    widget_label "`date "+$w_format"`"
+
+
+# 'Click' and 'MouseDown' blocks, followed by button numbers, are executed when
+# the numbered button is clicked.
+Click 1
+    eval "$w_clickcmd"
+
+
+# The 'Update' block is executed periodically on an interval. The interval (in
+# the format accepted by 'sleep') is the number that follows 'Update'.
+Update 1s
+    widget_label "`date "+$w_format"`"
+

@@ -1,0 +1,21 @@
+
+Start
+    w_width=40
+    w_cmd="$wmii_term -e top"
+    if [ -n "$1" ]; then
+        w_width="$1"
+        if [ -n "$2" ]; then
+            w_cmd="$2"
+        fi
+    fi
+    widget_label "[ ]"
+Click 1
+    eval "$w_cmd"
+Update 2s
+    top_two=`top -bn 1 | head -n 9 | tail -n 2 | awk '{ print $9 "% " $12 }'`
+    top_process=`echo "$top_two" | head -n 1`
+    if echo $top_process | grep -q ' top$'; then
+        top_process=`echo "$top_two" | tail -n 1`
+    fi
+    widget_label "[ `printf "%-${w_width}s" "$top_process" | cut -c 1-$w_width` ]"
+

@@ -1,0 +1,19 @@
+
+delete-widgets
+    for i in `seq 0 $wmii_widget_counter`; do
+        wmiir rm "/rbar/widget$i"
+    done
+exec
+    wmiir xwrite /ctl exec "$@"
+hello
+    xmessage 'Hello, world!' &
+mode
+    mode "$@"
+rehash
+    list_programs $PATH > $progsfile &
+quit
+    wmiir xwrite /ctl quit
+widget
+    widget "$@"
+
+

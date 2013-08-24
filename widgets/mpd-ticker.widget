@@ -1,0 +1,23 @@
+
+Start
+    w_size=40
+    if [ -n "$1" ]; then
+        w_size="$1"
+    fi
+    widget_label "[ ]"
+MouseDown 1
+    mpc toggle
+    wmiir xwrite /event "Update $widget_id"
+Click 3
+    mpc_cmd=`wmii9menu -i "[] Stop " "[> Play :play" "|| Pause:pause" ">> Next :next" "<< Prev:prev" "[] Stop :stop"`
+    mpc $mpc_cmd
+    unset mpc_cmd
+MouseDown 4
+    mpc next
+    wmiir xwrite /event "Update $widget_id"
+MouseDown 5
+    mpc prev
+    wmiir xwrite /event "Update $widget_id"
+Update 0.5s
+    widget_label "[ `mpc current | ticker -t 500 -l $w_size` ]"
+

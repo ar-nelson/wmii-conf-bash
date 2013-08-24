@@ -1,0 +1,75 @@
+# This is a modefile, which defines a set of key commands.
+#
+# This file defines key commands for the resize mode, in which the direction
+# keys (defined in options.sh) can be used to resize and/or move windows.
+
+# Direction keys: grow
+$left
+    wmiir xwrite /tag/sel/ctl grow client sel left 1
+$right
+    wmiir xwrite /tag/sel/ctl grow client sel right 1
+$up
+    wmiir xwrite /tag/sel/ctl grow client sel up 1
+$down
+    wmiir xwrite /tag/sel/ctl grow client sel down 1
+
+# Ctrl-direction keys: Shrink
+Control-$left
+    wmiir xwrite /tag/sel/ctl grow client sel right -1
+Control-$right
+    wmiir xwrite /tag/sel/ctl grow client sel left -1
+Control-$up
+    wmiir xwrite /tag/sel/ctl grow client sel down -1
+Control-$down
+    wmiir xwrite /tag/sel/ctl grow client sel up -1
+
+# Shift-direction keys: Nudge
+Shift-$left
+    wmiir xwrite /tag/sel/ctl nudge client sel left
+Shift-$right
+    wmiir xwrite /tag/sel/ctl nudge client sel right
+Shift-$up
+    wmiir xwrite /tag/sel/ctl nudge client sel up
+Shift-$down
+    wmiir xwrite /tag/sel/ctl nudge client sel down
+
+# Mod-direction keys: Switch window
+$modkey-$left
+    wmiir xwrite /tag/sel/ctl select left
+$modkey-$right
+    wmiir xwrite /tag/sel/ctl select right
+$modkey-$up
+    wmiir xwrite /tag/sel/ctl select up
+$modkey-$down
+    wmiir xwrite /tag/sel/ctl select down
+$modkey-space
+    wmiir xwrite /tag/sel/ctl select toggle
+
+# Mod-Shift-direction keys: Move window
+$modkey-Shift-$left
+    wmiir xwrite /tag/sel/ctl send sel left
+$modkey-Shift-$right
+    wmiir xwrite /tag/sel/ctl send sel right
+$modkey-Shift-$up
+    wmiir xwrite /tag/sel/ctl send sel up
+$modkey-Shift-$down
+    wmiir xwrite /tag/sel/ctl send sel down
+$modkey-Shift-space
+    wmiir xwrite /tag/sel/ctl send sel toggle
+
+# Column mode changing still works
+$modkey-d
+    wmiir xwrite /tag/sel/ctl colmode sel default-max
+$modkey-s
+    wmiir xwrite /tag/sel/ctl colmode sel stack-max
+$modkey-m
+    wmiir xwrite /tag/sel/ctl colmode sel stack+max
+
+# Exit resize mode with Mod-R, Esc, or Enter.
+$modkey-r
+    mode default
+Return
+    mode default
+Escape
+    mode default
+

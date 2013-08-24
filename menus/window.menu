@@ -1,0 +1,38 @@
+# This file is the window menu file.
+#
+# It is a list of menu item names, each of which is followed by an indented
+# sequence of shell commands. The variable $win is defined in this file as the
+# id of the window that was right-clicked.
+
+Toggle Floating
+    wmiir xwrite /tag/sel/ctl send $win toggle
+
+Fullscreen
+    wmiir xwrite /client/$win/ctl Fullscreen on
+
+Set Tags...
+    {
+        # Prompt the user for new tags
+        tag=$(wmiir ls /tag | sed 's,/,,; /^sel$/d' | wimenu -s 0)
+        # Write them to the client
+        wmiir xwrite /client/sel/tags $tag
+    } &
+
+Remove from Tag
+    wmiir xwrite /client/$win/tags -$(wmiir read /tag/sel/ctl | head -n 1) 
+
+Properties
+    xprop -id $win > "/tmp/wmii-window-properties"
+    wihack -transient $win $wmii_xmessage -file "/tmp/wmii-window-properties" &
+
+Close
+    wmiir xwrite /client/$win/ctl kill
+
+Force Close
+    {
+        win_name=$(wmiir read /client/$win/label)
+        msg="Are your sure you want to forcibly close the window \"$win_name\"?${wmii_newline}Any unsaved data will be lost!"
+        resp=$(wihack -transient $win $wmii_xmessage -nearmouse -buttons Close,Cancel -print "$msg")
+        [ "$resp" = Close ] && wmiir xwrite /client/$win/ctl slay &
+    } &
+

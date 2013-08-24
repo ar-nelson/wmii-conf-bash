@@ -1,0 +1,120 @@
+# This is a modefile, which defines a set of key commands.
+#
+# This file defines key commands for the default mode, the mode which wmii is
+# in when not in any other mode. The key commands here are used for navigating
+# windows and launching programs.
+#
+# Note that some standard key combinations are defined in 'global.mode', which
+# defines key combinations which work in all modes.
+#
+# This file has access to all shell variables and functions defined in
+# 'wmiirc', including those defined in 'options.sh'.
+
+# Motion keys
+$modkey-$left
+    wmiir xwrite /tag/sel/ctl select left
+$modkey-$right
+    wmiir xwrite /tag/sel/ctl select right
+$modkey-$up
+    wmiir xwrite /tag/sel/ctl select up
+$modkey-$down
+    wmiir xwrite /tag/sel/ctl select down
+$modkey-space
+    wmiir xwrite /tag/sel/ctl select toggle
+
+# Client movement
+$modkey-Shift-$left
+    wmiir xwrite /tag/sel/ctl send sel left
+$modkey-Shift-$right
+    wmiir xwrite /tag/sel/ctl send sel right
+$modkey-Shift-$up
+    wmiir xwrite /tag/sel/ctl send sel up
+$modkey-Shift-$down
+    wmiir xwrite /tag/sel/ctl send sel down
+$modkey-Shift-space
+    wmiir xwrite /tag/sel/ctl send sel toggle
+
+# Column Mode
+$modkey-d
+    wmiir xwrite /tag/sel/ctl colmode sel default-max
+$modkey-s
+    wmiir xwrite /tag/sel/ctl colmode sel stack-max
+$modkey-m
+    wmiir xwrite /tag/sel/ctl colmode sel stack+max
+
+# Client Commands
+$modkey-Shift-c
+    wmiir xwrite /client/sel/ctl kill
+$modkey-f
+    wmiir xwrite /client/sel/ctl Fullscreen toggle
+
+# Run program
+$modkey-Return
+    wmiir setsid $wmii_term &
+$modkey-p
+    programs_menu &
+$modkey-a
+    actions_menu &
+
+# Select view
+$modkey-t
+    {
+        # Prompt the user for a tag
+        tag=$(wmiir ls /tag | sed 's,/,,; /^sel$/d' | wimenu -s 0)
+        # Write it to the filesystem.
+        wmiir xwrite /ctl view $tag
+    } &
+$modkey-0
+    wmiir xwrite /ctl view 0
+$modkey-1
+    wmiir xwrite /ctl view 1
+$modkey-2
+    wmiir xwrite /ctl view 2
+$modkey-3
+    wmiir xwrite /ctl view 3
+$modkey-4
+    wmiir xwrite /ctl view 4
+$modkey-5
+    wmiir xwrite /ctl view 5
+$modkey-6
+    wmiir xwrite /ctl view 6
+$modkey-7
+    wmiir xwrite /ctl view 7
+$modkey-8
+    wmiir xwrite /ctl view 8
+$modkey-9
+    wmiir xwrite /ctl view 9
+
+# Tag client
+$modkey-Shift-t
+    {
+        # Prompt the user for new tags
+        tag=$(wmiir ls /tag | sed 's,/,,; /^sel$/d' | wimenu -s 0)
+        # Write them to the client
+        wmiir xwrite /client/sel/tags $tag
+    } &
+$modkey-Shift-0
+    wmiir xwrite /client/sel/ctl tags 0
+$modkey-Shift-1
+    wmiir xwrite /client/sel/ctl tags 1
+$modkey-Shift-2
+    wmiir xwrite /client/sel/ctl tags 2
+$modkey-Shift-3
+    wmiir xwrite /client/sel/ctl tags 3
+$modkey-Shift-4
+    wmiir xwrite /client/sel/ctl tags 4
+$modkey-Shift-5
+    wmiir xwrite /client/sel/ctl tags 5
+$modkey-Shift-6
+    wmiir xwrite /client/sel/ctl tags 6
+$modkey-Shift-7
+    wmiir xwrite /client/sel/ctl tags 7
+$modkey-Shift-8
+    wmiir xwrite /client/sel/ctl tags 8
+$modkey-Shift-9
+    wmiir xwrite /client/sel/ctl tags 9
+
+# Mode shifting
+$modkey-r
+    mode resize
+
